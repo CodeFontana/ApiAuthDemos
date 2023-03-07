@@ -9,6 +9,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ApiKeyAuthDemo", "ApiKeyAut
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ApiKeyMiddlewareAuthDemo", "ApiKeyMiddlewareAuthDemo\ApiKeyMiddlewareAuthDemo.csproj", "{426D7F6C-BDD5-4B9B-B1EB-824D75104B69}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ApiKeyAuthFilterDemo", "ApiKeyAuthFilterDemo\ApiKeyAuthFilterDemo.csproj", "{47510D69-5020-430B-A927-C62289501956}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{426D7F6C-BDD5-4B9B-B1EB-824D75104B69}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{426D7F6C-BDD5-4B9B-B1EB-824D75104B69}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{426D7F6C-BDD5-4B9B-B1EB-824D75104B69}.Release|Any CPU.Build.0 = Release|Any CPU
+		{47510D69-5020-430B-A927-C62289501956}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{47510D69-5020-430B-A927-C62289501956}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{47510D69-5020-430B-A927-C62289501956}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{47510D69-5020-430B-A927-C62289501956}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
