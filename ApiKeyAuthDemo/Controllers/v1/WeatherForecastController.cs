@@ -1,8 +1,9 @@
+using ApiKeyAuthDemo.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using JwtAuthDemo.Models;
 
-namespace JwtAuthDemo.Controllers.v1;
+namespace ApiKeyAuthDemo.Controllers.v1;
+
 [ApiController]
 [Route("api/v{version:apiVersion}/[controller]")]
 public class WeatherForecastController : ControllerBase

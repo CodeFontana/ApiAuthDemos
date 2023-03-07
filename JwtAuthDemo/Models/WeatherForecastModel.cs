@@ -1,6 +1,6 @@
-namespace JwtAuthDemo;
+namespace JwtAuthDemo.Models;
 
-public class WeatherForecast
+public class WeatherForecastModel
 {
     public DateOnly Date { get; set; }
 
