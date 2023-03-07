@@ -5,7 +5,9 @@ VisualStudioVersion = 17.5.33424.131
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JwtAuthDemo", "JwtAuthDemo\JwtAuthDemo.csproj", "{FF3489B9-D4CD-4A66-9CAD-D80176EED2B3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ApiKeyAuthDemo", "ApiKeyAuthDemo\ApiKeyAuthDemo.csproj", "{A4366A76-D3D3-4F3D-93DF-B8A548C71CFD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ApiKeyAuthDemo", "ApiKeyAuthDemo\ApiKeyAuthDemo.csproj", "{A4366A76-D3D3-4F3D-93DF-B8A548C71CFD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ApiKeyMiddlewareAuthDemo", "ApiKeyMiddlewareAuthDemo\ApiKeyMiddlewareAuthDemo.csproj", "{426D7F6C-BDD5-4B9B-B1EB-824D75104B69}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{A4366A76-D3D3-4F3D-93DF-B8A548C71CFD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A4366A76-D3D3-4F3D-93DF-B8A548C71CFD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A4366A76-D3D3-4F3D-93DF-B8A548C71CFD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{426D7F6C-BDD5-4B9B-B1EB-824D75104B69}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{426D7F6C-BDD5-4B9B-B1EB-824D75104B69}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{426D7F6C-BDD5-4B9B-B1EB-824D75104B69}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{426D7F6C-BDD5-4B9B-B1EB-824D75104B69}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
