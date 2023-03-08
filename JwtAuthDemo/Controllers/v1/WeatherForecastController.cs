@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using JwtAuthDemo.Models;
 
 namespace JwtAuthDemo.Controllers.v1;
+
 [ApiController]
 [Route("api/v{version:apiVersion}/[controller]")]
 public class WeatherForecastController : ControllerBase
@@ -19,7 +20,7 @@ public class WeatherForecastController : ControllerBase
         _logger = logger;
     }
 
-    [HttpGet(Name = "GetWeatherForecast")]
+    [HttpGet]
     [Authorize]
     public IEnumerable<WeatherForecastModel> Get()
     {

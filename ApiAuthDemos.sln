@@ -7,9 +7,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JwtAuthDemo", "JwtAuthDemo\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ApiKeyAuthDemo", "ApiKeyAuthDemo\ApiKeyAuthDemo.csproj", "{A4366A76-D3D3-4F3D-93DF-B8A548C71CFD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ApiKeyMiddlewareAuthDemo", "ApiKeyMiddlewareAuthDemo\ApiKeyMiddlewareAuthDemo.csproj", "{426D7F6C-BDD5-4B9B-B1EB-824D75104B69}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ApiKeyMiddlewareAuthDemo", "ApiKeyMiddlewareAuthDemo\ApiKeyMiddlewareAuthDemo.csproj", "{426D7F6C-BDD5-4B9B-B1EB-824D75104B69}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ApiKeyAuthFilterDemo", "ApiKeyAuthFilterDemo\ApiKeyAuthFilterDemo.csproj", "{47510D69-5020-430B-A927-C62289501956}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ApiKeyAuthFilterDemo", "ApiKeyAuthFilterDemo\ApiKeyAuthFilterDemo.csproj", "{47510D69-5020-430B-A927-C62289501956}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JwtAndApiKeyAuthDemo", "JwtAndApiKeyAuthDemo\JwtAndApiKeyAuthDemo.csproj", "{20333B2E-58DB-46D0-9994-71FC200A4327}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,10 @@ Global
 		{47510D69-5020-430B-A927-C62289501956}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{47510D69-5020-430B-A927-C62289501956}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{47510D69-5020-430B-A927-C62289501956}.Release|Any CPU.Build.0 = Release|Any CPU
+		{20333B2E-58DB-46D0-9994-71FC200A4327}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{20333B2E-58DB-46D0-9994-71FC200A4327}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{20333B2E-58DB-46D0-9994-71FC200A4327}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{20333B2E-58DB-46D0-9994-71FC200A4327}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

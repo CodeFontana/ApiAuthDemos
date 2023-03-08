@@ -1,6 +1,6 @@
-namespace ApiKeyMiddlewareAuthDemo;
+namespace JwtAndApiKeyAuthDemo.Models;
 
-public class WeatherForecast
+public class WeatherForecastModel
 {
     public DateOnly Date { get; set; }
 

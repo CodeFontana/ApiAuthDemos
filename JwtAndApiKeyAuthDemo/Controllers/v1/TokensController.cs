@@ -1,9 +1,9 @@
-﻿using JwtAuthDemo.Interfaces;
-using JwtAuthDemo.Models;
+﻿using JwtAndApiKeyAuthDemo.Models;
+using JwtAndAPiKeyAuthDemo.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace JwtAuthDemo.Controllers.v1;
+namespace JwtAndApiKeyAuthDemo;
 
 [ApiController]
 [Route("api/v{version:apiVersion}/[controller]")]

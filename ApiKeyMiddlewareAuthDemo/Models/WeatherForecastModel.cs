@@ -1,6 +1,6 @@
-namespace ApiKeyAuthFilterDemo;
+namespace ApiKeyMiddlewareAuthDemo.Models;
 
-public class WeatherForecast
+public class WeatherForecastModel
 {
     public DateOnly Date { get; set; }
 

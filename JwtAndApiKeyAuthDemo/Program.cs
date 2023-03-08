@@ -1,5 +1,7 @@
-using JwtAuthDemo.Interfaces;
-using JwtAuthDemo.Services;
+using JwtAndApiKeyAuthDemo;
+using JwtAndApiKeyAuthDemo.Services;
+using JwtAndAPiKeyAuthDemo.Interfaces;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
@@ -34,19 +36,41 @@ builder.Services.AddSwaggerGen(options =>
         Type = SecuritySchemeType.ApiKey
     });
     options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
             {
+                Reference = new OpenApiReference
                 {
-                    new OpenApiSecurityScheme
-                    {
-                        Reference = new OpenApiReference
-                        {
-                            Type = ReferenceType.SecurityScheme,
-                            Id = "Bearer"
-                        }
-                    },
-                    Array.Empty<string>()
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
                 }
-            });
+            },
+            Array.Empty<string>()
+        }
+    });
+    options.AddSecurityDefinition("ApiKey", new OpenApiSecurityScheme()
+    {
+        Name = "X-API-KEY",
+        Type = SecuritySchemeType.ApiKey,
+        In = ParameterLocation.Header,
+        Description = "API key authorization header.",
+    });
+
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "ApiKey"
+                }
+            },
+            new string[] {}
+        }
+    });
 });
 builder.Services.AddApiVersioning(options =>
 {
@@ -59,10 +83,25 @@ builder.Services.AddVersionedApiExplorer(options =>
     options.GroupNameFormat = "'v'VVV";
     options.SubstituteApiVersionInUrl = true;
 });
+
 builder.Services.AddAuthentication(options =>
 {
-    options.DefaultAuthenticateScheme = "Bearer";
-    options.DefaultChallengeScheme = "Bearer";
+    options.DefaultAuthenticateScheme = "JwtOrApiKey";
+    options.DefaultChallengeScheme = "JwtOrApiKey";
+})
+.AddPolicyScheme("JwtOrApiKey", "Authorization JWT Bearer or API key", options =>
+{
+    options.ForwardDefaultSelector = context =>
+    {
+        string authHeader = context.Request.Headers["Authorization"].FirstOrDefault();
+
+        if (authHeader?.StartsWith("Bearer ") == true)
+        {
+            return JwtBearerDefaults.AuthenticationScheme;
+        }
+
+        return ApiKeyAuthenticationDefaults.AuthenticationScheme;
+    };
 })
 .AddJwtBearer(options =>
 {
@@ -79,7 +118,9 @@ builder.Services.AddAuthentication(options =>
         ValidateLifetime = true,
         ClockSkew = TimeSpan.FromMinutes(10)
     };
-});
+})
+.AddApiKey<ApiKeyAuthenticationService>();
+
 builder.Services.AddCors(policy =>
 {
     policy.AddPolicy("OpenCorsPolicy", options =>
@@ -89,6 +130,7 @@ builder.Services.AddCors(policy =>
             .AllowAnyMethod());
 });
 builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddScoped<IApiKeyAuthenticationService, ApiKeyAuthenticationService>();
 WebApplication app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -109,6 +151,7 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseCors("OpenCorsPolicy");
 app.UseAuthentication();
+app.UseAuthorization();
 app.UseAuthorization();
 app.MapControllers();
 app.Run();
