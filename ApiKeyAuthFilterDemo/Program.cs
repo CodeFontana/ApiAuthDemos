@@ -1,3 +1,4 @@
+using ApiKeyAuthFilterDemo.Filters;
 using Microsoft.OpenApi.Models;
 using System.Text.Json.Serialization;
 
@@ -63,6 +64,7 @@ builder.Services.AddCors(policy =>
             .AllowAnyHeader()
             .AllowAnyMethod());
 });
+builder.Services.AddScoped<ApiKeyAuthFilter>();
 WebApplication app = builder.Build();
 
 if (app.Environment.IsDevelopment())

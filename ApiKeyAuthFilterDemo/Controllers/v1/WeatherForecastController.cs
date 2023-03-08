@@ -1,3 +1,4 @@
+using ApiKeyAuthFilterDemo.Filters;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ApiKeyAuthFilterDemo.Controllers.v1;
@@ -19,6 +20,8 @@ public class WeatherForecastController : ControllerBase
     }
 
     [HttpGet]
+    [ServiceFilter(typeof(ApiKeyAuthFilter))]
+    // [ApiKeyAuthFilter] <-- Alternate approach, see ApiKeyAuthFilter.cs
     public IEnumerable<WeatherForecast> Get()
     {
         return Enumerable.Range(1, 5).Select(index => new WeatherForecast
