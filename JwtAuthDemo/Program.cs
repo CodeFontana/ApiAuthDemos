@@ -89,6 +89,7 @@ builder.Services.AddCors(policy =>
             .AllowAnyMethod());
 });
 builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddHealthChecks();
 WebApplication app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -111,4 +112,5 @@ app.UseCors("OpenCorsPolicy");
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+app.MapHealthChecks("/api/health");
 app.Run();

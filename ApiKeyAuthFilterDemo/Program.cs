@@ -65,6 +65,7 @@ builder.Services.AddCors(policy =>
             .AllowAnyMethod());
 });
 builder.Services.AddScoped<ApiKeyAuthFilter>();
+builder.Services.AddHealthChecks();
 WebApplication app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -86,4 +87,5 @@ app.UseHttpsRedirection();
 app.UseCors("OpenCorsPolicy");
 app.UseAuthorization();
 app.MapControllers();
+app.MapHealthChecks("/api/health");
 app.Run();

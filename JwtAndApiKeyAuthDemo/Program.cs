@@ -131,6 +131,7 @@ builder.Services.AddCors(policy =>
 });
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IApiKeyAuthenticationService, ApiKeyAuthenticationService>();
+builder.Services.AddHealthChecks();
 WebApplication app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -154,4 +155,5 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.UseAuthorization();
 app.MapControllers();
+app.MapHealthChecks("/api/health");
 app.Run();
