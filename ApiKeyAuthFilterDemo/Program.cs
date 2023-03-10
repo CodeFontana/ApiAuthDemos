@@ -87,5 +87,5 @@ app.UseHttpsRedirection();
 app.UseCors("OpenCorsPolicy");
 app.UseAuthorization();
 app.MapControllers();
-app.MapHealthChecks("/api/health");
+app.MapHealthChecks("/api/health").AllowAnonymous();
 app.Run();

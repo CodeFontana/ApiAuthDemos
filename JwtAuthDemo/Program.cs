@@ -112,5 +112,5 @@ app.UseCors("OpenCorsPolicy");
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
-app.MapHealthChecks("/api/health");
+app.MapHealthChecks("/api/health").AllowAnonymous();
 app.Run();
