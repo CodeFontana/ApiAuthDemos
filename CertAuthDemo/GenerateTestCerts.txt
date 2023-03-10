@@ -1,0 +1,24 @@
+Powershell instructions:
+
+1- Generate server certificate:
+New-SelfSignedCertificate -DnsName "localhost", "localhost" -CertStoreLocation "cert:\LocalMachine\My" -NotAfter (Get-Date).AddYears(10) -FriendlyName "CAlocalhost" -KeyUsageProperty All -KeyUsage CertSign, CRLSign, DigitalSignature
+
+2- Generate password:
+$mypwd = ConvertTo-SecureString -String "Server123" -Force -AsPlainText
+
+3- Export server certificate to PFX:
+Get-ChildItem -Path cert:\localMachine\my\<Thumbprint> | Export-PfxCertificate -FilePath .\cacert.pfx -Password $mypwd
+
+4- Generate client certificate from server certificate:
+$rootcert = ( Get-ChildItem -Path cert:\LocalMachine\My\<Thumbprint> )
+New-SelfSignedCertificate -certstorelocation cert:\localmachine\my -dnsname "localhost" -Signer $rootcert -NotAfter (Get-Date).AddYears(10) -FriendlyName "Clientlocalhost"
+
+5- Generate password:
+$mypwd = ConvertTo-SecureString -String "Client123" -Force -AsPlainText
+
+6- Export client certificate to PFX:
+Get-ChildItem -Path cert:\localMachine\my\<Client certificate thumbprint> | Export-PfxCertificate -FilePath .\clientcert.pfx -Password $mypwd
+
+7- Import server certificate into Trusted Root Certificates
+
+8- Import client certificate into Postman or whichever tool. Swagger doesn't seem to support an authentication option using a client-side certificate.
