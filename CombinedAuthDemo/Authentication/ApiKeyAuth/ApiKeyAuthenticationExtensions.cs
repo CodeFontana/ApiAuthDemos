@@ -1,26 +1,27 @@
-﻿using Microsoft.AspNetCore.Authentication;
+﻿using JwtAndApiKeyAuthDemo;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Options;
 
-namespace JwtAndApiKeyAuthDemo;
+namespace CombinedAuthDemo.Authentication.ApiKeyAuth;
 
 public static class ApiKeyAuthenticationExtensions
 {
     public static AuthenticationBuilder AddApiKey<TAuthService>(this AuthenticationBuilder builder)
         where TAuthService : class, IApiKeyAuthenticationService
     {
-        return AddApiKey<TAuthService>(builder, ApiKeyAuthenticationDefaults.AuthenticationScheme, _ => { });
+        return builder.AddApiKey<TAuthService>(ApiKeyAuthenticationDefaults.AuthenticationScheme, _ => { });
     }
 
     public static AuthenticationBuilder AddApiKey<TAuthService>(this AuthenticationBuilder builder, string authenticationScheme)
         where TAuthService : class, IApiKeyAuthenticationService
     {
-        return AddApiKey<TAuthService>(builder, authenticationScheme, _ => { });
+        return builder.AddApiKey<TAuthService>(authenticationScheme, _ => { });
     }
 
     public static AuthenticationBuilder AddApiKey<TAuthService>(this AuthenticationBuilder builder, Action<ApiKeyAuthenticationOptions> configureOptions)
         where TAuthService : class, IApiKeyAuthenticationService
     {
-        return AddApiKey<TAuthService>(builder, ApiKeyAuthenticationDefaults.AuthenticationScheme, configureOptions);
+        return builder.AddApiKey<TAuthService>(ApiKeyAuthenticationDefaults.AuthenticationScheme, configureOptions);
     }
 
     public static AuthenticationBuilder AddApiKey<TAuthService>(this AuthenticationBuilder builder, string authenticationScheme, Action<ApiKeyAuthenticationOptions> configureOptions)

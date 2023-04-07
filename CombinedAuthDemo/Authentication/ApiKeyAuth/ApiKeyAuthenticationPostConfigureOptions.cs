@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Options;
 
-namespace JwtAndApiKeyAuthDemo;
+namespace CombinedAuthDemo.Authentication.ApiKeyAuth;
 
 public class ApiKeyAuthenticationPostConfigureOptions : IPostConfigureOptions<ApiKeyAuthenticationOptions>
 {

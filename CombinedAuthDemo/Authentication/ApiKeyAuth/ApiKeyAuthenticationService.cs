@@ -1,6 +1,7 @@
-﻿using JwtAndApiKeyAuthDemo.Models;
+﻿using JwtAndApiKeyAuthDemo;
+using JwtAndApiKeyAuthDemo.Models;
 
-namespace JwtAndApiKeyAuthDemo;
+namespace CombinedAuthDemo.Authentication.ApiKeyAuth;
 
 public class ApiKeyAuthenticationService : IApiKeyAuthenticationService
 {

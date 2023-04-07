@@ -1,4 +1,4 @@
-﻿namespace JwtAndApiKeyAuthDemo;
+﻿namespace CombinedAuthDemo.Authentication.ApiKeyAuth;
 
 public static class ApiKeyAuthenticationDefaults
 {

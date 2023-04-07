@@ -1,6 +1,9 @@
+using CombinedAuthDemo.Authentication;
+using CombinedAuthDemo.Authentication.ApiKeyAuth;
 using JwtAndApiKeyAuthDemo;
 using JwtAndApiKeyAuthDemo.Services;
 using JwtAndAPiKeyAuthDemo.Interfaces;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -83,43 +86,49 @@ builder.Services.AddVersionedApiExplorer(options =>
     options.GroupNameFormat = "'v'VVV";
     options.SubstituteApiVersionInUrl = true;
 });
-
 builder.Services.AddAuthentication(options =>
 {
-    options.DefaultAuthenticateScheme = "JwtOrApiKey";
-    options.DefaultChallengeScheme = "JwtOrApiKey";
+    options.DefaultAuthenticateScheme = "CombinedPolicy";
+    options.DefaultChallengeScheme = "CombinedPolicy";
 })
-.AddPolicyScheme("JwtOrApiKey", "Authorization JWT Bearer or API key", options =>
-{
-    options.ForwardDefaultSelector = context =>
+    .AddScheme<AuthenticationSchemeOptions, CombinedAuthenticationHandler>("CombinedPolicy", _ => { })
+    .AddJwtBearer(options =>
     {
-        string authHeader = context.Request.Headers["Authorization"].FirstOrDefault();
-
-        if (authHeader?.StartsWith("Bearer ") == true)
+        options.TokenValidationParameters = new()
         {
-            return JwtBearerDefaults.AuthenticationScheme;
-        }
-
-        return ApiKeyAuthenticationDefaults.AuthenticationScheme;
-    };
-})
-.AddJwtBearer(options =>
+            ValidateIssuer = true,
+            ValidIssuer = builder.Configuration.GetValue<string>("Authentication:JwtIssuer"),
+            ValidateAudience = true,
+            ValidAudience = builder.Configuration.GetValue<string>("Authentication:JwtAudience"),
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.ASCII.GetBytes(
+                    builder.Configuration.GetValue<string>("Authentication:JwtSecurityKey"))),
+            ValidateLifetime = true,
+            ClockSkew = TimeSpan.FromMinutes(10)
+        };
+    })
+    .AddApiKey<ApiKeyAuthenticationService>();
+builder.Services.AddAuthorization(options =>
 {
-    options.TokenValidationParameters = new()
+    options.AddPolicy("JwtPolicy", policy =>
     {
-        ValidateIssuer = true,
-        ValidIssuer = builder.Configuration.GetValue<string>("Authentication:JwtIssuer"),
-        ValidateAudience = true,
-        ValidAudience = builder.Configuration.GetValue<string>("Authentication:JwtAudience"),
-        ValidateIssuerSigningKey = true,
-        IssuerSigningKey = new SymmetricSecurityKey(
-            Encoding.ASCII.GetBytes(
-                builder.Configuration.GetValue<string>("Authentication:JwtSecurityKey"))),
-        ValidateLifetime = true,
-        ClockSkew = TimeSpan.FromMinutes(10)
-    };
-})
-.AddApiKey<ApiKeyAuthenticationService>();
+        policy.RequireAuthenticatedUser();
+        policy.AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme);
+    });
+
+    options.AddPolicy("ApiKeyPolicy", policy =>
+    {
+        policy.RequireAuthenticatedUser();
+        policy.AddAuthenticationSchemes(ApiKeyAuthenticationDefaults.AuthenticationScheme);
+    });
+
+    options.AddPolicy("CombinedPolicy", policy =>
+    {
+        policy.RequireAuthenticatedUser();
+        policy.AddAuthenticationSchemes("CombinedPolicy");
+    });
+});
 
 builder.Services.AddCors(policy =>
 {
@@ -152,7 +161,6 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseCors("OpenCorsPolicy");
 app.UseAuthentication();
-app.UseAuthorization();
 app.UseAuthorization();
 app.MapControllers();
 app.MapHealthChecks("/api/health").AllowAnonymous();

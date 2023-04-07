@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authentication;
 
-namespace JwtAndApiKeyAuthDemo;
+namespace CombinedAuthDemo.Authentication.ApiKeyAuth;
 
 public class ApiKeyAuthenticationOptions : AuthenticationSchemeOptions { };
