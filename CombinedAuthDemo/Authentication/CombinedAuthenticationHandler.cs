@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.Text.Encodings.Web;
+using Microsoft.AspNetCore.Authorization;
 
 namespace CombinedAuthDemo.Authentication;
 
@@ -20,6 +21,19 @@ public class CombinedAuthenticationHandler : AuthenticationHandler<Authenticatio
 
     protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
     {
+        // Check for [AllowAnonymous] decorator on the endpoint
+        Endpoint endpoint = Context.GetEndpoint();
+        
+        if (endpoint != null)
+        {
+            IAllowAnonymous allowAnonymous = endpoint.Metadata.GetMetadata<IAllowAnonymous>();
+
+            if (allowAnonymous != null)
+            {
+                return AuthenticateResult.NoResult();
+            }
+        }
+
         // Try JWT Bearer authentication first
         AuthenticateResult jwtResult = await Context.AuthenticateAsync(JwtBearerDefaults.AuthenticationScheme);
 
