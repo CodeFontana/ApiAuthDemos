@@ -1,0 +1,12 @@
+### POST to obtain JWT
+POST https://localhost:7258/api/v1/Tokens
+Content-Type: application/json
+
+{
+  "Username": "Homer",
+  "Password": "742EvergreenTerrace"
+}
+
+### GET WeatherForcasts
+GET https://localhost:7258/api/v1/WeatherForecast
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1lIjoiSG9tZXIiLCJ1bmlxdWVfbmFtZSI6IkhvbWVyIiwiaXNzIjoiaHR0cHM6Ly9sb2NhbGhvc3Q6NzI1OCIsImF1ZCI6IldlYkFwaVRlbXBsYXRlIiwibmJmIjoiMTY4NTkwODEwMiIsImV4cCI6IjE2ODU5MTE3MDIifQ.Qf7v3xteGztALn3Jtn9saqu_wl_Efjb3i45nEuEwSLE
