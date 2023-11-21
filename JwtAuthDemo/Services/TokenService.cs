@@ -23,15 +23,15 @@ public class TokenService : ITokenService
 
     public string CreateTokenAsync(string username)
     {
-        List<Claim> claims = new()
-        {
+        List<Claim> claims =
+        [
             new Claim(ClaimTypes.Name, username),
             new Claim(JwtRegisteredClaimNames.UniqueName, username),
             new Claim(JwtRegisteredClaimNames.Iss, _jwtIssuer),
             new Claim(JwtRegisteredClaimNames.Aud, _jwtAudience),
             new Claim(JwtRegisteredClaimNames.Nbf, new DateTimeOffset(DateTime.Now).ToUnixTimeSeconds().ToString()),
             new Claim(JwtRegisteredClaimNames.Exp, new DateTimeOffset(DateTime.Now.AddMinutes(_jwtLifetimeMinutes)).ToUnixTimeSeconds().ToString())
-        };
+        ];
 
         SigningCredentials signingCredentials = new(_key, SecurityAlgorithms.HmacSha256);
         JwtSecurityToken token = new(new JwtHeader(signingCredentials), new JwtPayload(claims));

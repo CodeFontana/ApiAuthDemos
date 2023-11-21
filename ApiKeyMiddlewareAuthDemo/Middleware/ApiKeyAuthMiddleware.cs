@@ -1,7 +1,5 @@
 ﻿using ApiKeyMiddlewareAuthDemo.Models;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Primitives;
-using Microsoft.Net.Http.Headers;
 
 namespace ApiKeyMiddlewareAuthDemo.Middleware;
 
