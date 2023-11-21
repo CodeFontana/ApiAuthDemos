@@ -8,17 +8,10 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace CombinedAuthDemo.Authentication;
 
-public class CombinedAuthenticationHandler : AuthenticationHandler<AuthenticationSchemeOptions>
+public class CombinedAuthenticationHandler(IOptionsMonitor<AuthenticationSchemeOptions> options,
+                                           ILoggerFactory logger,
+                                           UrlEncoder encoder) : AuthenticationHandler<AuthenticationSchemeOptions>(options, logger, encoder)
 {
-    public CombinedAuthenticationHandler(IOptionsMonitor<AuthenticationSchemeOptions> options,
-                                         ILoggerFactory logger,
-                                         UrlEncoder encoder,
-                                         ISystemClock clock)
-        : base(options, logger, encoder, clock)
-    {
-
-    }
-
     protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
     {
         // Check for [AllowAnonymous] decorator on the endpoint
