@@ -8,26 +8,15 @@ using System.Text.Encodings.Web;
 
 namespace ApiKeyAuthDemo.ApiKeyAuth;
 
-public class ApiKeyAuthenticationHandler : AuthenticationHandler<ApiKeyAuthenticationOptions>
+public class ApiKeyAuthenticationHandler(IOptionsMonitor<ApiKeyAuthenticationOptions> options,
+                                         ILoggerFactory logger,
+                                         UrlEncoder encoder,
+                                         IConfiguration configuration,
+                                         IApiKeyAuthenticationService authenticationService) : AuthenticationHandler<ApiKeyAuthenticationOptions>(options, logger, encoder)
 {
-    private const string ApiKeySchemeName = ApiKeyAuthenticationDefaults.AuthenticationScheme;
-    private readonly IConfiguration _config;
-    private readonly IApiKeyAuthenticationService _authenticationService;
-
-    public ApiKeyAuthenticationHandler(IOptionsMonitor<ApiKeyAuthenticationOptions> options,
-                                       ILoggerFactory logger,
-                                       UrlEncoder encoder,
-                                       ISystemClock clock,
-                                       IConfiguration configuration,
-                                       IApiKeyAuthenticationService authenticationService) : base(options, logger, encoder, clock)
-    {
-        _config = configuration;
-        _authenticationService = authenticationService;
-    }
-
     protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
     {
-        List<ApiKeyModel> apiKeys = _config.GetSection("ApiKeys").Get<List<ApiKeyModel>>();
+        List<ApiKeyModel> apiKeys = configuration.GetSection("ApiKeys").Get<List<ApiKeyModel>>();
 
         KeyValuePair<string, StringValues> apiKeyHeader = Request.Headers
             .FirstOrDefault(h => apiKeys.Select(
@@ -38,7 +27,7 @@ public class ApiKeyAuthenticationHandler : AuthenticationHandler<ApiKeyAuthentic
             return AuthenticateResult.Fail("Missing API key");
         }
 
-        bool isValid = await _authenticationService.IsValidAsync(apiKeyHeader.Key, apiKeyHeader.Value);
+        bool isValid = await authenticationService.IsValidAsync(apiKeyHeader.Key, apiKeyHeader.Value);
 
         if (isValid == false)
         {
@@ -46,7 +35,7 @@ public class ApiKeyAuthenticationHandler : AuthenticationHandler<ApiKeyAuthentic
         }
 
         ApiKeyModel apiKey = apiKeys.FirstOrDefault(x => x.HeaderName.ToLower().Equals(apiKeyHeader.Key.ToLower()));
-        Claim[] claims = new[] { new Claim(ClaimTypes.Name, apiKey.IssuedTo) };
+        Claim[] claims = [new Claim(ClaimTypes.Name, apiKey.IssuedTo)];
         ClaimsIdentity identity = new(claims, Scheme.Name);
         ClaimsPrincipal principal = new(identity);
         AuthenticationTicket ticket = new(principal, Scheme.Name);
