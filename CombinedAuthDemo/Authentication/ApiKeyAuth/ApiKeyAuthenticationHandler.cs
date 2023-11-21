@@ -11,12 +11,20 @@ namespace CombinedAuthDemo.Authentication.ApiKeyAuth;
 /// <summary>
 /// Constructor
 /// </summary>
-public class ApiKeyAuthenticationHandler(IOptionsMonitor<ApiKeyAuthenticationOptions> options,
-                                         ILoggerFactory logger,
-                                         UrlEncoder encoder,
-                                         IConfiguration configuration,
-                                         IApiKeyAuthenticationService authenticationService) : AuthenticationHandler<ApiKeyAuthenticationOptions>(options, logger, encoder)
+public class ApiKeyAuthenticationHandler : AuthenticationHandler<ApiKeyAuthenticationOptions>
 {
+    private readonly IConfiguration _configuration;
+    private readonly IApiKeyAuthenticationService _authenticationService;
+
+    public ApiKeyAuthenticationHandler(IOptionsMonitor<ApiKeyAuthenticationOptions> options,
+                                       ILoggerFactory logger,
+                                       UrlEncoder encoder,
+                                       IConfiguration configuration,
+                                       IApiKeyAuthenticationService authenticationService) : base(options, logger, encoder)
+    {
+        _configuration = configuration;
+        _authenticationService = authenticationService;
+    }
 
     /// <summary>
     /// Handles API key authentication 
@@ -24,7 +32,7 @@ public class ApiKeyAuthenticationHandler(IOptionsMonitor<ApiKeyAuthenticationOpt
     protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
     {
         // Get list of API keys from configuration
-        List<ApiKeyModel> apiKeys = configuration.GetSection("ApiKeys").Get<List<ApiKeyModel>>();
+        List<ApiKeyModel> apiKeys = _configuration.GetSection("ApiKeys").Get<List<ApiKeyModel>>();
 
         // Get first header, which matches the specification of one of our API keys
         // Hint: Our configuration supports multiple API keys, each of which could be
@@ -39,7 +47,7 @@ public class ApiKeyAuthenticationHandler(IOptionsMonitor<ApiKeyAuthenticationOpt
         }
 
         // Is the API key for the specified header valid?
-        bool isValid = await authenticationService.IsValidAsync(apiKeyHeader.Key, apiKeyHeader.Value);
+        bool isValid = await _authenticationService.IsValidAsync(apiKeyHeader.Key, apiKeyHeader.Value);
 
         if (isValid == false)
         {
