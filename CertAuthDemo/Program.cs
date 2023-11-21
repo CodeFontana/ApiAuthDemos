@@ -1,3 +1,4 @@
+using CertAuthDemo.Interfaces;
 using CertAuthDemo.Services;
 using Microsoft.AspNetCore.Authentication.Certificate;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
@@ -44,7 +45,7 @@ builder.Services.AddSwaggerGen(options =>
                     Id = "ApiKey"
                 }
             },
-            new string[] {}
+            Array.Empty<string>()
         }
     });
 });
@@ -63,8 +64,8 @@ builder.Services.AddAuthentication(options =>
 
             if (validService.ValidateCertificate(context.ClientCertificate))
             {
-                Claim[] claims = new[]
-                {
+                Claim[] claims =
+                [
                     new Claim(
                         ClaimTypes.NameIdentifier,
                         context.ClientCertificate.Subject,
@@ -75,7 +76,7 @@ builder.Services.AddAuthentication(options =>
                         context.ClientCertificate.Subject,
                         ClaimValueTypes.String,
                         context.Options.ClaimsIssuer)
-                };
+                ];
 
                 context.Principal = new ClaimsPrincipal(
                     new ClaimsIdentity(claims, context.Scheme.Name));
