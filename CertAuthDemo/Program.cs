@@ -83,7 +83,7 @@ builder.Services.AddAuthentication(options =>
                 return Task.CompletedTask;
             }
 
-            context.Fail("Certifcate validation failure");
+            context.Fail("Certificate validation failure");
             return Task.CompletedTask;
         }
     };
