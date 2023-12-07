@@ -4,9 +4,13 @@ using CombinedAuthDemo.Authentication.ApiKeyAuth;
 using CombinedAuthDemo.Interfaces;
 using CombinedAuthDemo.Services;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Certificate;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using System.Security.Claims;
 using System.Text;
 using System.Text.Json.Serialization;
 
@@ -109,7 +113,44 @@ builder.Services.AddAuthentication(options =>
             ClockSkew = TimeSpan.FromMinutes(10)
         };
     })
-    .AddApiKey<ApiKeyAuthenticationService>();
+    .AddApiKey<ApiKeyAuthenticationService>()
+    .AddCertificate(options =>
+    {
+        options.AllowedCertificateTypes = CertificateTypes.All;
+        options.Events = new CertificateAuthenticationEvents
+        {
+            OnCertificateValidated = context =>
+            {
+                ICertificateValidationService validService = context.HttpContext.RequestServices.GetRequiredService<ICertificateValidationService>();
+
+                if (validService.ValidateCertificate(context.ClientCertificate))
+                {
+                    Claim[] claims = new[]
+                    {
+                        new Claim(
+                            ClaimTypes.NameIdentifier,
+                            context.ClientCertificate.Subject,
+                            ClaimValueTypes.String,
+                            context.Options.ClaimsIssuer),
+                        new Claim(
+                            ClaimTypes.Name,
+                            context.ClientCertificate.Subject,
+                            ClaimValueTypes.String,
+                            context.Options.ClaimsIssuer)
+                    };
+
+                    context.Principal = new ClaimsPrincipal(
+                        new ClaimsIdentity(claims, context.Scheme.Name));
+                    context.Success();
+                    return Task.CompletedTask;
+                }
+
+                context.Fail("Certificate validation failure");
+                return Task.CompletedTask;
+            }
+        };
+    });
+
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("JwtPolicy", policy =>
@@ -122,6 +163,12 @@ builder.Services.AddAuthorization(options =>
     {
         policy.RequireAuthenticatedUser();
         policy.AddAuthenticationSchemes(ApiKeyAuthenticationDefaults.AuthenticationScheme);
+    });
+
+    options.AddPolicy("CertificatePolicy", policy =>
+    {
+        policy.RequireAuthenticatedUser();
+        policy.AddAuthenticationSchemes(CertificateAuthenticationDefaults.AuthenticationScheme);
     });
 
     options.AddPolicy("CombinedPolicy", policy =>
@@ -141,7 +188,25 @@ builder.Services.AddCors(policy =>
 });
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IApiKeyAuthenticationService, ApiKeyAuthenticationService>();
+builder.Services.AddTransient<ICertificateValidationService, CertificateValidationService>();
 builder.Services.AddHealthChecks();
+builder.Services.Configure<KestrelServerOptions>(options =>
+{
+    options.ConfigureHttpsDefaults(options =>
+    {
+        options.ClientCertificateMode = Microsoft.AspNetCore.Server.Kestrel.Https.ClientCertificateMode.AllowCertificate;
+    });
+});
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+    options.KnownNetworks.Clear();
+    options.KnownProxies.Clear();
+});
+builder.Services.AddCertificateForwarding(options =>
+{
+    options.CertificateHeader = "X-ARR-ClientCert";
+});
 WebApplication app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -161,6 +226,8 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseCors("OpenCorsPolicy");
+app.UseForwardedHeaders();
+app.UseCertificateForwarding();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
