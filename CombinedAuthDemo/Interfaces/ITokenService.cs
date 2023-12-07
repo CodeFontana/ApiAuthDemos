@@ -1,4 +1,4 @@
-﻿namespace JwtAndAPiKeyAuthDemo.Interfaces;
+﻿namespace CombinedAuthDemo.Interfaces;
 
 public interface ITokenService
 {

@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace JwtAndApiKeyAuthDemo.Models;
+namespace CombinedAuthDemo.Models;
 
 public class LoginUserModel
 {

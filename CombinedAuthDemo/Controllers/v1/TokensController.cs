@@ -1,5 +1,5 @@
-﻿using JwtAndApiKeyAuthDemo.Models;
-using JwtAndAPiKeyAuthDemo.Interfaces;
+﻿using CombinedAuthDemo.Interfaces;
+using CombinedAuthDemo.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

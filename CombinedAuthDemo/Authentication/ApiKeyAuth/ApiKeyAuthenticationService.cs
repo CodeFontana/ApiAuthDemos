@@ -1,5 +1,4 @@
-﻿using JwtAndApiKeyAuthDemo;
-using JwtAndApiKeyAuthDemo.Models;
+﻿using CombinedAuthDemo.Models;
 
 namespace CombinedAuthDemo.Authentication.ApiKeyAuth;
 

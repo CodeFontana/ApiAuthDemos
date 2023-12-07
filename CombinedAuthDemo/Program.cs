@@ -1,8 +1,8 @@
+using CombinedAuthDemo;
 using CombinedAuthDemo.Authentication;
 using CombinedAuthDemo.Authentication.ApiKeyAuth;
-using JwtAndApiKeyAuthDemo;
-using JwtAndApiKeyAuthDemo.Services;
-using JwtAndAPiKeyAuthDemo.Interfaces;
+using CombinedAuthDemo.Interfaces;
+using CombinedAuthDemo.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;

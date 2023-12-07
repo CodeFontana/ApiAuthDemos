@@ -1,4 +1,4 @@
-namespace JwtAndApiKeyAuthDemo.Models;
+namespace CombinedAuthDemo.Models;
 
 public class WeatherForecastModel
 {

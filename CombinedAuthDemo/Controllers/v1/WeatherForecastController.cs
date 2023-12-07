@@ -1,6 +1,6 @@
-using JwtAndApiKeyAuthDemo.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using CombinedAuthDemo.Models;
 
 namespace JwtAndApiKeyAuthDemo.Controllers.v1;
 [ApiController]

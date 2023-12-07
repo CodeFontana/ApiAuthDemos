@@ -5,6 +5,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.Text.Encodings.Web;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authentication.Certificate;
 
 namespace CombinedAuthDemo.Authentication;
 
@@ -29,6 +30,15 @@ public class CombinedAuthenticationHandler : AuthenticationHandler<Authenticatio
             {
                 return AuthenticateResult.NoResult();
             }
+        }
+
+        // Try certificate authentication
+        AuthenticateResult certResult = await Context.AuthenticateAsync(CertificateAuthenticationDefaults.AuthenticationScheme);
+
+        // If certificate authentication is successful, return the result
+        if (certResult.Succeeded)
+        {
+            return certResult;
         }
 
         // Try JWT Bearer authentication first

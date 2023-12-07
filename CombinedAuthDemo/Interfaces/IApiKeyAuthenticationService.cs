@@ -1,4 +1,4 @@
-﻿namespace JwtAndApiKeyAuthDemo;
+﻿namespace CombinedAuthDemo;
 
 public interface IApiKeyAuthenticationService
 {
