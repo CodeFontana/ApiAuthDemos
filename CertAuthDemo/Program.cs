@@ -1,6 +1,7 @@
 using CertAuthDemo.Interfaces;
 using CertAuthDemo.Services;
 using Microsoft.AspNetCore.Authentication.Certificate;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.OpenApi.Models;
 using System.Security.Claims;
@@ -116,6 +117,16 @@ builder.Services.Configure<KestrelServerOptions>(options =>
         options.ClientCertificateMode = Microsoft.AspNetCore.Server.Kestrel.Https.ClientCertificateMode.AllowCertificate;
     });
 });
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+    options.KnownNetworks.Clear();
+    options.KnownProxies.Clear();
+});
+builder.Services.AddCertificateForwarding(options =>
+{
+    options.CertificateHeader = "X-ARR-ClientCert";
+});
 builder.Services.AddTransient<ICertificateValidationService, CertificateValidationService>();
 builder.Services.AddHealthChecks();
 WebApplication app = builder.Build();
@@ -137,6 +148,8 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseCors("OpenCorsPolicy");
+app.UseForwardedHeaders();
+app.UseCertificateForwarding();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();

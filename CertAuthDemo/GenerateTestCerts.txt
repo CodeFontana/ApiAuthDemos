@@ -22,3 +22,5 @@ Get-ChildItem -Path cert:\localMachine\my\<Client certificate thumbprint> | Expo
 7- Import server certificate into Trusted Root Certificates
 
 8- Import client certificate into Postman or whichever tool. Swagger doesn't seem to support an authentication option using a client-side certificate.
+
+9- Update appsettings.development.json with the expected Issuer, Subject and Thumbprint values for the client certificate.
