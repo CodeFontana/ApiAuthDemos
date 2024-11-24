@@ -26,8 +26,8 @@ public class TokensController : ControllerBase
             ?? throw new InvalidOperationException("ApiUsers is missing in appsettings.json");
 
         LoginUserModel? foundUser = authorizedUsers
-            .Where(x => x.Username.ToLower().Equals(loginUser.Username.ToLower())
-                && x.Password.ToLower().Equals(loginUser.Password.ToLower()))
+            .Where(x => x.Username.Equals(loginUser.Username)
+                && x.Password.Equals(loginUser.Password))
             .FirstOrDefault();
 
         if (foundUser is null)

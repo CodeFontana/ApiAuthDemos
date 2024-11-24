@@ -1,6 +1,6 @@
+using System.Text.Json.Serialization;
 using ApiKeyAuthDemo.ApiKeyAuth;
 using Microsoft.OpenApi.Models;
-using System.Text.Json.Serialization;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
@@ -41,7 +41,7 @@ builder.Services.AddSwaggerGen(options =>
                     Id = "ApiKey"
                 }
             },
-            new string[] {}
+            Array.Empty<string>()
         }
     });
 });
