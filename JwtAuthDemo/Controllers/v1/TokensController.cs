@@ -18,15 +18,16 @@ public class TokensController : ControllerBase
         _tokenService = tokenService;
     }
 
-    // POST api/v1/Tokens
     [HttpPost]
     [AllowAnonymous]
     public ActionResult<string> GetToken([FromBody] LoginUserModel loginUser)
     {
-        List<LoginUserModel> authorizedUsers = _config.GetSection("ApiUsers").Get<List<LoginUserModel>>();
-        LoginUserModel foundUser = authorizedUsers
-            .Where(x => x.Username.ToLower().Equals(loginUser.Username.ToLower()))
-            .Where(x => x.Password.ToLower().Equals(loginUser.Password.ToLower()))
+        List<LoginUserModel> authorizedUsers = _config.GetSection("ApiUsers").Get<List<LoginUserModel>>()
+            ?? throw new InvalidOperationException("ApiUsers is missing in appsettings.json");
+
+        LoginUserModel? foundUser = authorizedUsers
+            .Where(x => x.Username.ToLower().Equals(loginUser.Username.ToLower())
+                && x.Password.ToLower().Equals(loginUser.Password.ToLower()))
             .FirstOrDefault();
 
         if (foundUser is null)

@@ -1,8 +1,8 @@
-﻿using JwtAuthDemo.Interfaces;
-using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
+﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using JwtAuthDemo.Interfaces;
+using Microsoft.IdentityModel.Tokens;
 
 namespace JwtAuthDemo.Services;
 
@@ -15,10 +15,15 @@ public class TokenService : ITokenService
 
     public TokenService(IConfiguration config)
     {
-        _key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["Authentication:JwtSecurityKey"]));
-        _jwtIssuer = config["Authentication:JwtIssuer"];
-        _jwtAudience = config["Authentication:JwtAudience"];
-        _jwtLifetimeMinutes = int.Parse(config["Authentication:JwtExpiryInMinutes"]);
+        string jwtSecurityKey = config["Authentication:JwtSecurityKey"]
+            ?? throw new InvalidOperationException("JwtSecurityKey is not configured");
+        _key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecurityKey));
+        _jwtIssuer = config["Authentication:JwtIssuer"]
+            ?? throw new InvalidOperationException("JwtIssuer is not configured");
+        _jwtAudience = config["Authentication:JwtAudience"]
+            ?? throw new InvalidOperationException("JwtAudience is not configured");
+        _jwtLifetimeMinutes = int.Parse(config["Authentication:JwtExpiryInMinutes"]
+            ?? throw new InvalidOperationException("JwtExpiryInMinutes is not configured"));
     }
 
     public string CreateTokenAsync(string username)

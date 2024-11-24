@@ -1,9 +1,9 @@
+using System.Text;
+using System.Text.Json.Serialization;
 using JwtAuthDemo.Interfaces;
 using JwtAuthDemo.Services;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using System.Text;
-using System.Text.Json.Serialization;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
@@ -75,8 +75,9 @@ builder.Services.AddAuthentication(options =>
         ValidAudience = builder.Configuration.GetValue<string>("Authentication:JwtAudience"),
         ValidateIssuerSigningKey = true,
         IssuerSigningKey = new SymmetricSecurityKey(
-            Encoding.ASCII.GetBytes(
-                builder.Configuration.GetValue<string>("Authentication:JwtSecurityKey"))),
+    Encoding.ASCII.GetBytes(
+        builder.Configuration.GetValue<string>("Authentication:JwtSecurityKey")
+            ?? throw new InvalidOperationException("JWTSecurityKey is not configured"))),
         ValidateLifetime = true,
         ClockSkew = TimeSpan.FromMinutes(10)
     };
