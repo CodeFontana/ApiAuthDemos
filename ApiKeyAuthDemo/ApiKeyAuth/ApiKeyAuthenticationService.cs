@@ -15,7 +15,7 @@ public class ApiKeyAuthenticationService : IApiKeyAuthenticationService
     public Task<bool> IsValidAsync(string headerName, string headerValue)
     {
         List<ApiKeyModel> configuredApiKeys = _config.GetSection("ApiKeys")?.Get<List<ApiKeyModel>>()
-            ?? throw new InvalidOperationException("ApiKeys are not configured");
+            ?? throw new InvalidOperationException("ApiKeys is missing from configuration");
 
         ApiKeyModel? apiKey = configuredApiKeys
             .Where(x => x.HeaderName.Equals(

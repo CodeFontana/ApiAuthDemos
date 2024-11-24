@@ -16,14 +16,14 @@ public class TokenService : ITokenService
     public TokenService(IConfiguration config)
     {
         string jwtSecurityKey = config["Authentication:JwtSecurityKey"]
-            ?? throw new InvalidOperationException("JwtSecurityKey is not configured");
+            ?? throw new InvalidOperationException("JwtSecurityKey is missing from configuration");
         _key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecurityKey));
         _jwtIssuer = config["Authentication:JwtIssuer"]
-            ?? throw new InvalidOperationException("JwtIssuer is not configured");
+            ?? throw new InvalidOperationException("JwtIssuer is missing from configuration");
         _jwtAudience = config["Authentication:JwtAudience"]
-            ?? throw new InvalidOperationException("JwtAudience is not configured");
+            ?? throw new InvalidOperationException("JwtAudience is missing from configuration");
         _jwtLifetimeMinutes = int.Parse(config["Authentication:JwtExpiryInMinutes"]
-            ?? throw new InvalidOperationException("JwtExpiryInMinutes is not configured"));
+            ?? throw new InvalidOperationException("JwtExpiryInMinutes is missing from configuration"));
     }
 
     public string CreateTokenAsync(string username)

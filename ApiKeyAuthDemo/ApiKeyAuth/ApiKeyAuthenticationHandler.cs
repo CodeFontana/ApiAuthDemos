@@ -26,7 +26,7 @@ public class ApiKeyAuthenticationHandler : AuthenticationHandler<ApiKeyAuthentic
     protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
     {
         List<ApiKeyModel> apiKeys = _configuration.GetSection("ApiKeys")?.Get<List<ApiKeyModel>>()
-            ?? throw new InvalidOperationException("ApiKeys is not configured");
+            ?? throw new InvalidOperationException("ApiKeys is missing from configuration");
 
         KeyValuePair<string, StringValues> apiKeyHeader = Request.Headers
             .FirstOrDefault(h =>
