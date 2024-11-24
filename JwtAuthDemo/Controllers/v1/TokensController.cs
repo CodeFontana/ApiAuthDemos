@@ -19,6 +19,8 @@ public class TokensController : ControllerBase
     }
 
     [HttpPost]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [AllowAnonymous]
     public ActionResult<string> GetToken([FromBody] LoginUserModel loginUser)
     {
