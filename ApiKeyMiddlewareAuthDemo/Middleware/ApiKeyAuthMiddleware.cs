@@ -3,7 +3,7 @@ using Microsoft.Extensions.Primitives;
 
 namespace ApiKeyMiddlewareAuthDemo.Middleware;
 
-public class ApiKeyAuthMiddleware
+public sealed class ApiKeyAuthMiddleware
 {
     private readonly RequestDelegate _next;
     private readonly IConfiguration _config;
@@ -16,7 +16,8 @@ public class ApiKeyAuthMiddleware
 
     public async Task InvokeAsync(HttpContext context)
     {
-        List<ApiKeyModel> validKeys = _config.GetSection("ApiKeys").Get<List<ApiKeyModel>>();
+        List<ApiKeyModel> validKeys = _config.GetSection("ApiKeys")?.Get<List<ApiKeyModel>>()
+            ?? throw new InvalidOperationException("No API keys found in configuration");
 
         KeyValuePair<string, StringValues> apiKeyHeader = context.Request.Headers
             .FirstOrDefault(h => validKeys.Select(
@@ -25,13 +26,13 @@ public class ApiKeyAuthMiddleware
         if (apiKeyHeader.Equals(default(KeyValuePair<string, StringValues>)))
         {
             context.Response.StatusCode = 401;
-            await context.Response.WriteAsync("Missing API key");
+            await context.Response.WriteAsync("Request header missing API key");
             return;
         }
 
-        ApiKeyModel matchingKey = validKeys
+        ApiKeyModel? matchingKey = validKeys
             .Where(x => x.HeaderName.ToLower().Equals(apiKeyHeader.Key.ToLower()))
-            .Where(x => x.ApiKey.ToLower().Equals(apiKeyHeader.Value[0].ToLower()))
+            .Where(x => x.ApiKey.Equals(apiKeyHeader.Value[0]))
             .FirstOrDefault();
 
         if (matchingKey is null)
