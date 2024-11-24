@@ -2,11 +2,13 @@
 using JwtAuthDemo.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace JwtAuthDemo.Controllers.v1;
 
 [ApiController]
 [Route("api/v{version:apiVersion}/[controller]")]
+[EnableRateLimiting("fixed")]
 public class TokensController : ControllerBase
 {
     private readonly IConfiguration _config;
