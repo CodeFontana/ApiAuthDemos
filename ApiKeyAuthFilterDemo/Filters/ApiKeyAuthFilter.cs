@@ -5,7 +5,7 @@ using Microsoft.Extensions.Primitives;
 
 namespace ApiKeyAuthFilterDemo.Filters;
 
-public class ApiKeyAuthFilter : Attribute, IAuthorizationFilter
+public sealed class ApiKeyAuthFilter : Attribute, IAuthorizationFilter
 {
     // Using the ServiceFilter approach,
     // [ServiceFilter(typeof(ApiKeyAuthFilter))]
@@ -24,7 +24,8 @@ public class ApiKeyAuthFilter : Attribute, IAuthorizationFilter
         // [ApiKeyAuthFilter]
         // ... you can obtain the IConfiguration from the HttpContext:
         //IConfiguration _config = context.HttpContext.RequestServices.GetService<IConfiguration>();
-        List<ApiKeyModel> validKeys = _config.GetSection("ApiKeys").Get<List<ApiKeyModel>>();
+        List<ApiKeyModel> validKeys = _config.GetSection("ApiKeys")?.Get<List<ApiKeyModel>>()
+            ?? throw new InvalidOperationException("ApiKeys section is missing from configuration");
 
         KeyValuePair<string, StringValues> apiKeyHeader = context.HttpContext.Request.Headers
             .FirstOrDefault(h => validKeys.Select(
@@ -32,13 +33,13 @@ public class ApiKeyAuthFilter : Attribute, IAuthorizationFilter
 
         if (apiKeyHeader.Equals(default(KeyValuePair<string, StringValues>)))
         {
-            context.Result = new UnauthorizedObjectResult("Missing API key");
+            context.Result = new UnauthorizedObjectResult("Request missing API key header");
             return;
         }
 
-        ApiKeyModel matchingKey = validKeys
+        ApiKeyModel? matchingKey = validKeys
             .Where(x => x.HeaderName.ToLower().Equals(apiKeyHeader.Key.ToLower()))
-            .Where(x => x.ApiKey.ToLower().Equals(apiKeyHeader.Value[0].ToLower()))
+            .Where(x => x.ApiKey.Equals(apiKeyHeader.Value[0]))
             .FirstOrDefault();
 
         if (matchingKey is null)
