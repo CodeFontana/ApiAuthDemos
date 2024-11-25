@@ -1,11 +1,14 @@
+using System.Net.Mime;
+using System.Security.Claims;
+using System.Text.Json.Serialization;
+using System.Threading.RateLimiting;
 using CertAuthDemo.Interfaces;
 using CertAuthDemo.Services;
 using Microsoft.AspNetCore.Authentication.Certificate;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.OpenApi.Models;
-using System.Security.Claims;
-using System.Text.Json.Serialization;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
@@ -127,8 +130,29 @@ builder.Services.AddCertificateForwarding(options =>
 {
     options.CertificateHeader = "X-ARR-ClientCert";
 });
-builder.Services.AddTransient<ICertificateValidationService, CertificateValidationService>();
+builder.Services.AddRateLimiter(options =>
+{
+    options.AddFixedWindowLimiter("fixed", limiterOptions =>
+    {
+        limiterOptions.PermitLimit = 4;
+        limiterOptions.Window = TimeSpan.FromSeconds(12);
+        limiterOptions.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+        limiterOptions.QueueLimit = 0;
+    });
+
+    options.OnRejected = (context, cancellationToken) =>
+    {
+        context.HttpContext.Response.StatusCode = StatusCodes.Status429TooManyRequests;
+        context.HttpContext.Response.ContentType = MediaTypeNames.Text.Plain;
+        context.HttpContext.RequestServices.GetService<ILoggerFactory>()?
+            .CreateLogger("Microsoft.AspNetCore.RateLimitingMiddleware")
+            .LogWarning("OnRejected: {GetUserEndPoint}", GetUserEndPoint(context.HttpContext));
+        context.HttpContext.Response.WriteAsync("Rate limit exceeded. Please try again later.", cancellationToken: cancellationToken);
+        return new ValueTask();
+    };
+});
 builder.Services.AddHealthChecks();
+builder.Services.AddTransient<ICertificateValidationService, CertificateValidationService>();
 WebApplication app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -148,6 +172,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseCors("OpenCorsPolicy");
+app.UseRateLimiter();
 app.UseForwardedHeaders();
 app.UseCertificateForwarding();
 app.UseAuthentication();
@@ -155,3 +180,8 @@ app.UseAuthorization();
 app.MapControllers();
 app.MapHealthChecks("/api/health").AllowAnonymous();
 app.Run();
+
+static string GetUserEndPoint(HttpContext context) =>
+    $"User {context.User.Identity?.Name ?? "Anonymous"}, " +
+    $"Endpoint: {context.Request.Path}, " +
+    $"IP: {context.Connection.RemoteIpAddress}";

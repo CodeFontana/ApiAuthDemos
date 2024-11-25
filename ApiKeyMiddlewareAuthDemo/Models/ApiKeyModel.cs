@@ -2,14 +2,14 @@
 
 namespace ApiKeyMiddlewareAuthDemo.Models;
 
-public class ApiKeyModel
+public sealed class ApiKeyModel
 {
     [Required]
-    public string HeaderName { get; set; }
+    public required string HeaderName { get; set; }
 
     [Required]
-    public string ApiKey { get; set; }
+    public required string ApiKey { get; set; }
 
     [Required]
-    public string IssuedTo { get; set; }
+    public required string IssuedTo { get; set; }
 }

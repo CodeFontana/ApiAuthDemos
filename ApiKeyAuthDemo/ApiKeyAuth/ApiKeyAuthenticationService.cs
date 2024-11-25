@@ -14,11 +14,14 @@ public class ApiKeyAuthenticationService : IApiKeyAuthenticationService
 
     public Task<bool> IsValidAsync(string headerName, string headerValue)
     {
-        List<ApiKeyModel> configuredApiKeys = _config.GetSection("ApiKeys").Get<List<ApiKeyModel>>();
+        List<ApiKeyModel> configuredApiKeys = _config.GetSection("ApiKeys")?.Get<List<ApiKeyModel>>()
+            ?? throw new InvalidOperationException("ApiKeys section is missing from configuration");
 
-        ApiKeyModel apiKey = configuredApiKeys
-            .Where(x => x.HeaderName.ToLower().Equals(headerName.ToLower()))
-            .Where(x => x.ApiKey.ToLower().Equals(headerValue.ToLower()))
+        ApiKeyModel? apiKey = configuredApiKeys
+            .Where(x => x.HeaderName.Equals(
+                headerName,
+                StringComparison.InvariantCultureIgnoreCase)
+                && x.ApiKey.Equals(headerValue))
             .FirstOrDefault();
 
         return Task.FromResult(apiKey != null);

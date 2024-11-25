@@ -1,6 +1,6 @@
 namespace ApiKeyMiddlewareAuthDemo.Models;
 
-public class WeatherForecastModel
+public sealed class WeatherForecastModel
 {
     public DateOnly Date { get; set; }
 
@@ -8,5 +8,5 @@ public class WeatherForecastModel
 
     public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
 
-    public string Summary { get; set; }
+    public string? Summary { get; set; }
 }

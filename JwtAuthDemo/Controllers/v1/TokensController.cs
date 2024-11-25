@@ -2,11 +2,13 @@
 using JwtAuthDemo.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace JwtAuthDemo.Controllers.v1;
 
 [ApiController]
 [Route("api/v{version:apiVersion}/[controller]")]
+[EnableRateLimiting("fixed")]
 public class TokensController : ControllerBase
 {
     private readonly IConfiguration _config;
@@ -18,15 +20,18 @@ public class TokensController : ControllerBase
         _tokenService = tokenService;
     }
 
-    // POST api/v1/Tokens
     [HttpPost]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [AllowAnonymous]
     public ActionResult<string> GetToken([FromBody] LoginUserModel loginUser)
     {
-        List<LoginUserModel> authorizedUsers = _config.GetSection("ApiUsers").Get<List<LoginUserModel>>();
-        LoginUserModel foundUser = authorizedUsers
-            .Where(x => x.Username.ToLower().Equals(loginUser.Username.ToLower()))
-            .Where(x => x.Password.ToLower().Equals(loginUser.Password.ToLower()))
+        List<LoginUserModel> authorizedUsers = _config.GetSection("ApiUsers").Get<List<LoginUserModel>>()
+            ?? throw new InvalidOperationException(message: "ApiUsers section is missing from configuration");
+
+        LoginUserModel? foundUser = authorizedUsers
+            .Where(x => x.Username.Equals(loginUser.Username)
+                && x.Password.Equals(loginUser.Password))
             .FirstOrDefault();
 
         if (foundUser is null)
