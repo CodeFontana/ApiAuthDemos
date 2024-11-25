@@ -27,7 +27,7 @@ public class TokensController : ControllerBase
     public ActionResult<string> GetToken([FromBody] LoginUserModel loginUser)
     {
         List<LoginUserModel> authorizedUsers = _config.GetSection("ApiUsers").Get<List<LoginUserModel>>()
-            ?? throw new InvalidOperationException("ApiUsers is missing in appsettings.json");
+            ?? throw new InvalidOperationException(message: "ApiUsers section is missing from configuration");
 
         LoginUserModel? foundUser = authorizedUsers
             .Where(x => x.Username.Equals(loginUser.Username)

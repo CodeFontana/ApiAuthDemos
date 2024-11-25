@@ -3,7 +3,7 @@ using CombinedAuthDemo.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace JwtAndApiKeyAuthDemo;
+namespace CombinedAuthDemo.Controllers.v1;
 
 [ApiController]
 [Route("api/v{version:apiVersion}/[controller]")]
@@ -23,10 +23,14 @@ public class TokensController : ControllerBase
     [AllowAnonymous]
     public ActionResult<string> GetToken([FromBody] LoginUserModel loginUser)
     {
-        List<LoginUserModel> authorizedUsers = _config.GetSection("ApiUsers").Get<List<LoginUserModel>>();
-        LoginUserModel foundUser = authorizedUsers
-            .Where(x => x.Username.ToLower().Equals(loginUser.Username.ToLower()))
-            .Where(x => x.Password.ToLower().Equals(loginUser.Password.ToLower()))
+        List<LoginUserModel> authorizedUsers = _config.GetSection("ApiUsers")?.Get<List<LoginUserModel>>() ??
+            throw new InvalidOperationException("ApiUsers section is missing from configuration");
+
+        LoginUserModel? foundUser = authorizedUsers
+            .Where(x => x.Username.Equals(
+                loginUser.Username,
+                StringComparison.InvariantCultureIgnoreCase)
+                && x.Password.Equals(loginUser.Password))
             .FirstOrDefault();
 
         if (foundUser is null)

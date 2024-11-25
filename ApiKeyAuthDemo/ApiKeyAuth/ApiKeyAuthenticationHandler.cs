@@ -10,23 +10,23 @@ namespace ApiKeyAuthDemo.ApiKeyAuth;
 
 public class ApiKeyAuthenticationHandler : AuthenticationHandler<ApiKeyAuthenticationOptions>
 {
-    private readonly IConfiguration _configuration;
+    private readonly IConfiguration _config;
     private readonly IApiKeyAuthenticationService _authenticationService;
 
     public ApiKeyAuthenticationHandler(IOptionsMonitor<ApiKeyAuthenticationOptions> options,
                                        ILoggerFactory logger,
                                        UrlEncoder encoder,
-                                       IConfiguration configuration,
+                                       IConfiguration config,
                                        IApiKeyAuthenticationService authenticationService) : base(options, logger, encoder)
     {
-        _configuration = configuration;
+        _config = config;
         _authenticationService = authenticationService;
     }
 
     protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
     {
-        List<ApiKeyModel> apiKeys = _configuration.GetSection("ApiKeys")?.Get<List<ApiKeyModel>>()
-            ?? throw new InvalidOperationException("ApiKeys is missing from configuration");
+        List<ApiKeyModel> apiKeys = _config.GetSection("ApiKeys")?.Get<List<ApiKeyModel>>()
+            ?? throw new InvalidOperationException("ApiKeys section is missing from configuration");
 
         KeyValuePair<string, StringValues> apiKeyHeader = Request.Headers
             .FirstOrDefault(h =>

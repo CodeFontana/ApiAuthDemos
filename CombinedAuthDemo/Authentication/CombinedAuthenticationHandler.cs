@@ -1,11 +1,11 @@
-﻿using CombinedAuthDemo.Authentication.ApiKeyAuth;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using System.Text.Encodings.Web;
+using CombinedAuthDemo.Authentication.ApiKeyAuth;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Certificate;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-using System.Text.Encodings.Web;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Authentication.Certificate;
 
 namespace CombinedAuthDemo.Authentication;
 
@@ -20,11 +20,11 @@ public class CombinedAuthenticationHandler : AuthenticationHandler<Authenticatio
     protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
     {
         // Check for [AllowAnonymous] decorator on the endpoint
-        Endpoint endpoint = Context.GetEndpoint();
-        
+        Endpoint? endpoint = Context.GetEndpoint();
+
         if (endpoint != null)
         {
-            IAllowAnonymous allowAnonymous = endpoint.Metadata.GetMetadata<IAllowAnonymous>();
+            IAllowAnonymous? allowAnonymous = endpoint.Metadata.GetMetadata<IAllowAnonymous>();
 
             if (allowAnonymous != null)
             {

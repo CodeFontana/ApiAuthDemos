@@ -5,11 +5,11 @@ namespace CombinedAuthDemo.Models;
 internal sealed class CertificateModel
 {
     [Required]
-    public string Issuer { get; set; } = string.Empty;
+    public required string Issuer { get; set; }
 
     [Required]
-    public string Subject { get; set; } = string.Empty;
+    public required string Subject { get; set; }
 
     [Required]
-    public string Thumbprint { get; set; } = string.Empty;
+    public required string Thumbprint { get; set; }
 }

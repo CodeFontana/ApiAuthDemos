@@ -1,6 +1,6 @@
-﻿using CombinedAuthDemo.Interfaces;
+﻿using System.Security.Cryptography.X509Certificates;
+using CombinedAuthDemo.Interfaces;
 using CombinedAuthDemo.Models;
-using System.Security.Cryptography.X509Certificates;
 
 namespace CombinedAuthDemo.Services;
 
@@ -24,14 +24,15 @@ internal sealed class CertificateValidationService : ICertificateValidationServi
             clientCertificate.Thumbprint);
 
         // Get list of allowed certificates from configuration
-        List<CertificateModel> allowedCerts = _config.GetSection("Certificates").Get<List<CertificateModel>>();
+        List<CertificateModel> allowedCerts = _config.GetSection("Certificates")?.Get<List<CertificateModel>>()
+            ?? throw new InvalidOperationException("Certifcates section is missing from configuration");
 
         // Verify if the client certificate matches one of the allowed certificates
         bool result = allowedCerts
             .Any(x =>
-                x.Thumbprint.Equals(clientCertificate.Thumbprint, System.StringComparison.InvariantCultureIgnoreCase)
-                && x.Subject.Equals(clientCertificate.Subject, System.StringComparison.InvariantCultureIgnoreCase)
-                && x.Issuer.Equals(clientCertificate.Issuer, System.StringComparison.InvariantCultureIgnoreCase));
+                x.Thumbprint.Equals(clientCertificate.Thumbprint, StringComparison.InvariantCultureIgnoreCase)
+                && x.Subject.Equals(clientCertificate.Subject, StringComparison.InvariantCultureIgnoreCase)
+                && x.Issuer.Equals(clientCertificate.Issuer, StringComparison.InvariantCultureIgnoreCase));
 
         if (result)
         {

@@ -1,13 +1,10 @@
 @local = https://localhost:7223
 @curEnv = {{local}}
-@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1lIjoiSG9tZXIiLCJ1bmlxdWVfbmFtZSI6IkhvbWVyIiwiaXNzIjoiaHR0cHM6Ly9sb2NhbGhvc3Q6NzI1OCIsImF1ZCI6IldlYkFwaVRlbXBsYXRlIiwibmJmIjoiMTY4MDg4MDUzMCIsImV4cCI6IjE2ODA4ODQxMzAifQ.gSTSVO1JRq-HgR9K8lgoq21jb0ANjFgAuS5X5XGJGgE
 
-# GET /api/v1/WeatherForecast --> Unauthorized (401)
 GET {{curEnv}}/api/v1/WeatherForecast
 
 ###
 
-# POST /api/v1/Tokens --> OK (200)
 POST {{curEnv}}/api/v1/Tokens
 Content-Type:application/json
 
@@ -18,6 +15,7 @@ Content-Type:application/json
 
 ###
 
-# GET /api/v1/WeatherForecast --> OK (200)
 GET {{curEnv}}/api/v1/WeatherForecast
-Authorization: Bearer {{token}}
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1lIjoiSG9tZXIiLCJ1bmlxdWVfbmFtZSI6IkhvbWVyIiwiaXNzIjoiaHR0cHM6Ly9sb2NhbGhvc3Q6NzI1OCIsImF1ZCI6IldlYkFwaVRlbXBsYXRlIiwibmJmIjoiMTY4MDg4MDUzMCIsImV4cCI6IjE2ODA4ODQxMzAifQ.gSTSVO1JRq-HgR9K8lgoq21jb0ANjFgAuS5X5XGJGgE
+
+###

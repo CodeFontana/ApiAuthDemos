@@ -1,12 +1,12 @@
-﻿using CombinedAuthDemo.Interfaces;
-using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
+﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using CombinedAuthDemo.Interfaces;
+using Microsoft.IdentityModel.Tokens;
 
 namespace CombinedAuthDemo.Services;
 
-public class TokenService : ITokenService
+internal sealed class TokenService : ITokenService
 {
     private readonly SymmetricSecurityKey _key;
     private readonly string _jwtIssuer;
@@ -15,10 +15,15 @@ public class TokenService : ITokenService
 
     public TokenService(IConfiguration config)
     {
-        _key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["Authentication:JwtSecurityKey"]));
-        _jwtIssuer = config["Authentication:JwtIssuer"];
-        _jwtAudience = config["Authentication:JwtAudience"];
-        _jwtLifetimeMinutes = int.Parse(config["Authentication:JwtExpiryInMinutes"]);
+        string jwtSecurityKey = config["Authentication:JwtSecurityKey"]
+            ?? throw new InvalidOperationException("JwtSecurityKey is missing from configuration");
+        _key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecurityKey));
+        _jwtIssuer = config["Authentication:JwtIssuer"]
+            ?? throw new InvalidOperationException("JwtIssuer is missing from configuration");
+        _jwtAudience = config["Authentication:JwtAudience"]
+            ?? throw new InvalidOperationException("JwtAudience is missing from configuration");
+        _jwtLifetimeMinutes = int.Parse(config["Authentication:JwtExpiryInMinutes"]
+            ?? throw new InvalidOperationException("JwtExpiryInMinutes is missing from configuration"));
     }
 
     public string CreateTokenAsync(string username)

@@ -17,7 +17,7 @@ public sealed class ApiKeyAuthMiddleware
     public async Task InvokeAsync(HttpContext context)
     {
         List<ApiKeyModel> validKeys = _config.GetSection("ApiKeys")?.Get<List<ApiKeyModel>>()
-            ?? throw new InvalidOperationException("No API keys found in configuration");
+            ?? throw new InvalidOperationException("ApiKeys section is missing from configuration");
 
         KeyValuePair<string, StringValues> apiKeyHeader = context.Request.Headers
             .FirstOrDefault(h => validKeys.Select(

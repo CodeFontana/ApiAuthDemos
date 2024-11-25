@@ -78,9 +78,9 @@ builder.Services.AddAuthentication(options =>
         ValidAudience = builder.Configuration.GetValue<string>("Authentication:JwtAudience"),
         ValidateIssuerSigningKey = true,
         IssuerSigningKey = new SymmetricSecurityKey(
-    Encoding.ASCII.GetBytes(
-        builder.Configuration.GetValue<string>("Authentication:JwtSecurityKey")
-            ?? throw new InvalidOperationException("JWTSecurityKey is missing from configuration"))),
+            Encoding.ASCII.GetBytes(
+                builder.Configuration.GetValue<string>("Authentication:JwtSecurityKey")
+                    ?? throw new InvalidOperationException("JWTSecurityKey is missing from configuration"))),
         ValidateLifetime = true,
         ClockSkew = TimeSpan.FromMinutes(10)
     };
