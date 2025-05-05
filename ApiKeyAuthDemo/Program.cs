@@ -52,8 +52,7 @@ builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = "ApiKey";
     options.DefaultChallengeScheme = "ApiKey";
-})
-    .AddApiKey<ApiKeyAuthenticationService>();
+}).AddApiKey<ApiKeyAuthenticationService>();
 builder.Services.AddApiVersioning(options =>
 {
     options.AssumeDefaultVersionWhenUnspecified = true;
