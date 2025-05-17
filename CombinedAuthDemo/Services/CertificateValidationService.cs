@@ -24,7 +24,8 @@ internal sealed class CertificateValidationService : ICertificateValidationServi
             clientCertificate.Thumbprint);
 
         // Get list of allowed certificates from configuration
-        List<CertificateModel> allowedCerts = _config.GetSection("Certificates")?.Get<List<CertificateModel>>()
+        IEnumerable<CertificateModel> allowedCerts = _config.GetSection("Certificates")?
+            .Get<IEnumerable<CertificateModel>>()
             ?? throw new InvalidOperationException("Certifcates section is missing from configuration");
 
         // Verify if the client certificate matches one of the allowed certificates
