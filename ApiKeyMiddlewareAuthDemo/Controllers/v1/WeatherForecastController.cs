@@ -16,6 +16,7 @@ public class WeatherForecastController : ControllerBase
 
     [HttpGet]
     [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public IEnumerable<WeatherForecastModel> Get()
     {
         return Enumerable.Range(1, 5).Select(index => new WeatherForecastModel

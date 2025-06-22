@@ -17,6 +17,7 @@ public class WeatherForecastController : ControllerBase
 
     [HttpGet]
     [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ServiceFilter(typeof(ApiKeyAuthFilter))]
     // [ApiKeyAuthFilter] <-- Alternate approach, see ApiKeyAuthFilter.cs
     public IEnumerable<WeatherForecastModel> Get()
