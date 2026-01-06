@@ -1,4 +1,4 @@
-﻿namespace ApiKeyAuthDemo.Interfaces;
+﻿namespace ApiKeyAuthDemo.ApiKeyAuth;
 
 public interface IApiKeyAuthenticationService
 {

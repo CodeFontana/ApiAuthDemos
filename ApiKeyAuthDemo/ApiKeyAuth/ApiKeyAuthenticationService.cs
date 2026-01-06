@@ -1,5 +1,4 @@
-﻿using ApiKeyAuthDemo.Interfaces;
-using ApiKeyAuthDemo.Models;
+﻿using ApiKeyAuthDemo.Models;
 
 namespace ApiKeyAuthDemo.ApiKeyAuth;
 
