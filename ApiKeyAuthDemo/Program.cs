@@ -2,8 +2,10 @@ using System.Net.Mime;
 using System.Text.Json.Serialization;
 using System.Threading.RateLimiting;
 using ApiKeyAuthDemo.ApiKeyAuth;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.OpenApi;
 using Microsoft.AspNetCore.RateLimiting;
-using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
@@ -11,60 +13,15 @@ builder.Services.AddControllers().AddJsonOptions(config =>
 {
     config.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
 });
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(options =>
+builder.Services.AddOpenApi(options =>
 {
-    options.SwaggerDoc("v1", new OpenApiInfo
-    {
-        Title = "WebApi v1",
-        Version = "v1",
-        Description = "This is a demo API"
-    });
-    //options.SwaggerDoc("v2", new OpenApiInfo
-    //{
-    //    Title = "WebApi v2",
-    //    Version = "v2",
-    //    Description = "This is a demo API"
-    //});
-    options.AddSecurityDefinition("ApiKey", new OpenApiSecurityScheme
-    {
-        Name = "X-API-KEY",
-        Type = SecuritySchemeType.ApiKey,
-        In = ParameterLocation.Header,
-        Description = "API key authorization header",
-    });
-    options.AddSecurityRequirement(new OpenApiSecurityRequirement
-    {
-        {
-            new OpenApiSecurityScheme
-            {
-                Reference = new OpenApiReference
-                {
-                    Type = ReferenceType.SecurityScheme,
-                    Id = "ApiKey"
-                }
-            },
-            Array.Empty<string>()
-        }
-    });
+    options.AddDocumentTransformer<ApiKeySecuritySchemeTransformer>();
 });
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = "ApiKey";
     options.DefaultChallengeScheme = "ApiKey";
 }).AddApiKey<ApiKeyAuthenticationService>();
-builder.Services.AddApiVersioning(options =>
-{
-    options.AssumeDefaultVersionWhenUnspecified = true;
-    options.DefaultApiVersion = new(1, 0);
-    options.ReportApiVersions = true;
-})
-    .AddMvc()
-    .AddApiExplorer(options =>
-    {
-        options.GroupNameFormat = "'v'VVV";
-        options.SubstituteApiVersionInUrl = true;
-    });
 builder.Services.AddCors(policy =>
 {
     policy.AddPolicy("OpenCorsPolicy", options =>
@@ -99,11 +56,11 @@ WebApplication app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
+    app.MapOpenApi().AllowAnonymous();
     app.UseSwaggerUI(options =>
     {
-        // options.SwaggerEndpoint("/swagger/v2/swagger.json", "WebApi v2");
-        options.SwaggerEndpoint("/swagger/v1/swagger.json", "WebApi v1");
+        // options.SwaggerEndpoint("/openapi/v2.json", "WebApi v2");
+        options.SwaggerEndpoint("/openapi/v1.json", "WebApi v1");
         options.EnableTryItOutByDefault();
         options.ConfigObject.AdditionalItems["syntaxHighlight"] = new Dictionary<string, object>
         {
@@ -125,3 +82,38 @@ static string GetUserEndPoint(HttpContext context) =>
     $"User {context.User.Identity?.Name ?? "Anonymous"}, " +
     $"Endpoint: {context.Request.Path}, " +
     $"IP: {context.Connection.RemoteIpAddress}";
+
+internal sealed class ApiKeySecuritySchemeTransformer(IAuthenticationSchemeProvider authenticationSchemeProvider) : IOpenApiDocumentTransformer
+{
+    public async Task TransformAsync(OpenApiDocument document, OpenApiDocumentTransformerContext context, CancellationToken cancellationToken)
+    {
+        IEnumerable<AuthenticationScheme> authenticationSchemes = await authenticationSchemeProvider.GetAllSchemesAsync();
+
+        if (authenticationSchemes.Any(authScheme => authScheme.Name == "ApiKey"))
+        {
+            // Add the security scheme at the document level
+            Dictionary<string, IOpenApiSecurityScheme> securitySchemes = new()
+            {
+                ["ApiKey"] = new OpenApiSecurityScheme
+                {
+                    Name = "X-API-KEY",
+                    Type = SecuritySchemeType.ApiKey,
+                    In = ParameterLocation.Header,
+                    Description = "API key authorization header",
+                }
+            };
+            document.Components ??= new OpenApiComponents();
+            document.Components.SecuritySchemes = securitySchemes;
+
+            // Apply it as a requirement for all operations
+            foreach (KeyValuePair<HttpMethod, OpenApiOperation> operation in document.Paths.Values.SelectMany(path => path.Operations!))
+            {
+                operation.Value.Security ??= [];
+                operation.Value.Security.Add(new OpenApiSecurityRequirement
+                {
+                    [new OpenApiSecuritySchemeReference("ApiKey", document)] = []
+                });
+            }
+        }
+    }
+}

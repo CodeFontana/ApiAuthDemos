@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace CombinedAuthDemo.Controllers.v1;
 
 [ApiController]
-[Route("api/v{version:apiVersion}/[controller]")]
+[Route("api/v1/[controller]")]
 public class TokensController : ControllerBase
 {
     private readonly IConfiguration _config;

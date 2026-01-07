@@ -8,7 +8,6 @@ using Microsoft.AspNetCore.Authentication.Certificate;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
-using Microsoft.OpenApi.Models;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
@@ -16,43 +15,7 @@ builder.Services.AddControllers().AddJsonOptions(config =>
 {
     config.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
 });
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(options =>
-{
-    options.SwaggerDoc("v1", new OpenApiInfo
-    {
-        Title = "WebApi v1",
-        Version = "v1",
-        Description = "This is a demo API"
-    });
-    //options.SwaggerDoc("v2", new OpenApiInfo
-    //{
-    //    Title = "WebApi v2",
-    //    Version = "v2",
-    //    Description = "This is a demo API"
-    //});
-    options.AddSecurityDefinition("ApiKey", new OpenApiSecurityScheme
-    {
-        Name = "X-API-KEY",
-        Type = SecuritySchemeType.ApiKey,
-        In = ParameterLocation.Header,
-        Description = "API key authorization header",
-    });
-    options.AddSecurityRequirement(new OpenApiSecurityRequirement
-    {
-        {
-            new OpenApiSecurityScheme
-            {
-                Reference = new OpenApiReference
-                {
-                    Type = ReferenceType.SecurityScheme,
-                    Id = "ApiKey"
-                }
-            },
-            Array.Empty<string>()
-        }
-    });
-});
+builder.Services.AddOpenApi();
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = CertificateAuthenticationDefaults.AuthenticationScheme;
@@ -93,18 +56,6 @@ builder.Services.AddAuthentication(options =>
         }
     };
 });
-builder.Services.AddApiVersioning(options =>
-{
-    options.AssumeDefaultVersionWhenUnspecified = true;
-    options.DefaultApiVersion = new(1, 0);
-    options.ReportApiVersions = true;
-})
-    .AddMvc()
-    .AddApiExplorer(options =>
-    {
-        options.GroupNameFormat = "'v'VVV";
-        options.SubstituteApiVersionInUrl = true;
-    });
 builder.Services.AddCors(policy =>
 {
     policy.AddPolicy("OpenCorsPolicy", options =>
@@ -123,7 +74,7 @@ builder.Services.Configure<KestrelServerOptions>(options =>
 builder.Services.Configure<ForwardedHeadersOptions>(options =>
 {
     options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
-    options.KnownNetworks.Clear();
+    options.KnownIPNetworks.Clear();
     options.KnownProxies.Clear();
 });
 builder.Services.AddCertificateForwarding(options =>
@@ -157,7 +108,7 @@ WebApplication app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
+    app.MapOpenApi().AllowAnonymous();
     app.UseSwaggerUI(options =>
     {
         // options.SwaggerEndpoint("/swagger/v2/swagger.json", "WebApi v2");

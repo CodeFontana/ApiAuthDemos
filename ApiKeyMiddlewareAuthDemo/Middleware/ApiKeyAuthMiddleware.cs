@@ -1,4 +1,5 @@
 ﻿using ApiKeyMiddlewareAuthDemo.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Primitives;
 
 namespace ApiKeyMiddlewareAuthDemo.Middleware;
@@ -16,6 +17,21 @@ public sealed class ApiKeyAuthMiddleware
 
     public async Task InvokeAsync(HttpContext context)
     {
+        // Check for [AllowAnonymous] decorator on the endpoint
+        Endpoint? endpoint = context.GetEndpoint();
+
+        if (endpoint != null)
+        {
+            IAllowAnonymous? allowAnonymous = endpoint.Metadata.GetMetadata<IAllowAnonymous>();
+
+            if (allowAnonymous != null)
+            {
+                // [AllowAnonymous] present
+                await _next(context);
+                return;
+            }
+        }
+
         List<ApiKeyModel> validKeys = _config.GetSection("ApiKeys")?.Get<List<ApiKeyModel>>()
             ?? throw new InvalidOperationException("ApiKeys section is missing from configuration");
 
