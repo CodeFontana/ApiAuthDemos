@@ -13,6 +13,10 @@ builder.Services.AddControllers().AddJsonOptions(config =>
 {
     config.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
 });
+builder.Services.AddOpenApi(options =>
+{
+    options.AddDocumentTransformer<ApiKeySecuritySchemeTransformer>();
+});
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = "ApiKey";
@@ -25,10 +29,6 @@ builder.Services.AddCors(policy =>
             .AllowAnyOrigin()
             .AllowAnyHeader()
             .AllowAnyMethod());
-});
-builder.Services.AddOpenApi(options =>
-{
-    options.AddDocumentTransformer<ApiKeySecuritySchemeTransformer>();
 });
 builder.Services.AddRateLimiter(options =>
 {

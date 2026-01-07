@@ -12,6 +12,10 @@ builder.Services.AddControllers().AddJsonOptions(config =>
 {
     config.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
 });
+builder.Services.AddOpenApi(options =>
+{
+    options.AddDocumentTransformer<ApiKeySecuritySchemeTransformer>();
+});
 builder.Services.AddCors(policy =>
 {
     policy.AddPolicy("OpenCorsPolicy", options =>
@@ -19,10 +23,6 @@ builder.Services.AddCors(policy =>
             .AllowAnyOrigin()
             .AllowAnyHeader()
             .AllowAnyMethod());
-});
-builder.Services.AddOpenApi(options =>
-{
-    options.AddDocumentTransformer<ApiKeySecuritySchemeTransformer>();
 });
 builder.Services.AddRateLimiter(options =>
 {
