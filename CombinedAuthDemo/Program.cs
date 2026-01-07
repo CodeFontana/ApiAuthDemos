@@ -12,10 +12,11 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Certificate;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.OpenApi;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
@@ -23,77 +24,10 @@ builder.Services.AddControllers().AddJsonOptions(config =>
 {
     config.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
 });
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(options =>
+builder.Services.AddOpenApi(options =>
 {
-    options.SwaggerDoc("v1", new OpenApiInfo
-    {
-        Title = "WebApi v1",
-        Version = "v1",
-        Description = "This is a demo API"
-    });
-    //options.SwaggerDoc("v2", new OpenApiInfo
-    //{
-    //    Title = "WebApi v2",
-    //    Version = "v2",
-    //    Description = "This is a demo API"
-    //});
-    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-    {
-        In = ParameterLocation.Header,
-        Description = "Specify JWT bearer token",
-        Name = "Authorization",
-        Type = SecuritySchemeType.ApiKey
-    });
-    options.AddSecurityRequirement(new OpenApiSecurityRequirement
-    {
-        {
-            new OpenApiSecurityScheme
-            {
-                Reference = new OpenApiReference
-                {
-                    Type = ReferenceType.SecurityScheme,
-                    Id = "Bearer"
-                }
-            },
-            Array.Empty<string>()
-        }
-    });
-    options.AddSecurityDefinition("ApiKey", new OpenApiSecurityScheme()
-    {
-        Name = "X-API-KEY",
-        Type = SecuritySchemeType.ApiKey,
-        In = ParameterLocation.Header,
-        Description = "API key authorization header.",
-    });
-
-    options.AddSecurityRequirement(new OpenApiSecurityRequirement
-    {
-        {
-            new OpenApiSecurityScheme
-            {
-                Reference = new OpenApiReference
-                {
-                    Type = ReferenceType.SecurityScheme,
-                    Id = "ApiKey"
-                }
-            },
-            Array.Empty<string>()
-        }
-    });
+    options.AddDocumentTransformer<SecuritySchemeTransformer>();
 });
-builder.Services.AddApiVersioning(options =>
-{
-    options.AssumeDefaultVersionWhenUnspecified = true;
-    options.DefaultApiVersion = new(1, 0);
-    options.ReportApiVersions = true;
-})
-    .AddMvc()
-    .AddApiExplorer(options =>
-    {
-        options.GroupNameFormat = "'v'VVV";
-        options.SubstituteApiVersionInUrl = true;
-    });
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = "CombinedPolicy";
@@ -114,7 +48,7 @@ builder.Services.AddAuthentication(options =>
                     builder.Configuration.GetValue<string>("Authentication:JwtSecurityKey")
                         ?? throw new InvalidOperationException("JWTSecurityKey is missing from configuration"))),
             ValidateLifetime = true,
-            ClockSkew = TimeSpan.FromMinutes(10)
+            ClockSkew = TimeSpan.FromMinutes(2)
         };
     })
     .AddApiKey<ApiKeyAuthenticationService>()
@@ -129,8 +63,8 @@ builder.Services.AddAuthentication(options =>
 
                 if (validService.ValidateCertificate(context.ClientCertificate))
                 {
-                    Claim[] claims = new[]
-                    {
+                    Claim[] claims =
+                    [
                         new Claim(
                             ClaimTypes.NameIdentifier,
                             context.ClientCertificate.Subject,
@@ -141,7 +75,7 @@ builder.Services.AddAuthentication(options =>
                             context.ClientCertificate.Subject,
                             ClaimValueTypes.String,
                             context.Options.ClaimsIssuer)
-                    };
+                    ];
 
                     context.Principal = new ClaimsPrincipal(
                         new ClaimsIdentity(claims, context.Scheme.Name));
@@ -154,34 +88,27 @@ builder.Services.AddAuthentication(options =>
             }
         };
     });
-
-builder.Services.AddAuthorization(options =>
-{
-    options.AddPolicy("JwtPolicy", policy =>
+builder.Services.AddAuthorizationBuilder()
+    .AddPolicy("JwtPolicy", policy =>
     {
         policy.RequireAuthenticatedUser();
         policy.AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme);
-    });
-
-    options.AddPolicy("ApiKeyPolicy", policy =>
+    })
+    .AddPolicy("ApiKeyPolicy", policy =>
     {
         policy.RequireAuthenticatedUser();
         policy.AddAuthenticationSchemes(ApiKeyAuthenticationDefaults.AuthenticationScheme);
-    });
-
-    options.AddPolicy("CertificatePolicy", policy =>
+    })
+    .AddPolicy("CertificatePolicy", policy =>
     {
         policy.RequireAuthenticatedUser();
         policy.AddAuthenticationSchemes(CertificateAuthenticationDefaults.AuthenticationScheme);
-    });
-
-    options.AddPolicy("CombinedPolicy", policy =>
+    })
+    .AddPolicy("CombinedPolicy", policy =>
     {
         policy.RequireAuthenticatedUser();
         policy.AddAuthenticationSchemes("CombinedPolicy");
     });
-});
-
 builder.Services.AddCors(policy =>
 {
     policy.AddPolicy("OpenCorsPolicy", options =>
@@ -200,7 +127,7 @@ builder.Services.Configure<KestrelServerOptions>(options =>
 builder.Services.Configure<ForwardedHeadersOptions>(options =>
 {
     options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
-    options.KnownNetworks.Clear();
+    options.KnownIPNetworks.Clear();
     options.KnownProxies.Clear();
 });
 builder.Services.AddCertificateForwarding(options =>
@@ -236,11 +163,11 @@ WebApplication app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
+    app.MapOpenApi().AllowAnonymous();
     app.UseSwaggerUI(options =>
     {
-        // options.SwaggerEndpoint("/swagger/v2/swagger.json", "WebApi v2");
-        options.SwaggerEndpoint("/swagger/v1/swagger.json", "WebApi v1");
+        // options.SwaggerEndpoint("/openapi/v2.json", "WebApi v2");
+        options.SwaggerEndpoint("/openapi/v1.json", "WebApi v1");
         options.EnableTryItOutByDefault();
         options.ConfigObject.AdditionalItems["syntaxHighlight"] = new Dictionary<string, object>
         {
@@ -264,3 +191,62 @@ static string GetUserEndPoint(HttpContext context) =>
     $"User {context.User.Identity?.Name ?? "Anonymous"}, " +
     $"Endpoint: {context.Request.Path}, " +
     $"IP: {context.Connection.RemoteIpAddress}";
+
+internal sealed class SecuritySchemeTransformer(IAuthenticationSchemeProvider authenticationSchemeProvider) : IOpenApiDocumentTransformer
+{
+    public async Task TransformAsync(OpenApiDocument document, OpenApiDocumentTransformerContext context, CancellationToken cancellationToken)
+    {
+        IEnumerable<AuthenticationScheme> authenticationSchemes = await authenticationSchemeProvider.GetAllSchemesAsync();
+        Dictionary<string, IOpenApiSecurityScheme> securitySchemes = [];
+        document.Components ??= new OpenApiComponents();
+
+        if (authenticationSchemes.Any(authScheme => authScheme.Name == "Bearer"))
+        {
+            // Add the security scheme at the document level
+            securitySchemes.Add("Bearer", new OpenApiSecurityScheme
+            {
+                Name = "Authorization",
+                Type = SecuritySchemeType.Http,
+                Scheme = "bearer",
+                BearerFormat = "JWT",
+                In = ParameterLocation.Header,
+                Description = "JWT Authorization header using the Bearer scheme. Enter your token (without the 'Bearer ' prefix).",
+            });
+
+            // Apply it as a requirement for all operations
+            foreach (KeyValuePair<HttpMethod, OpenApiOperation> operation in document.Paths.Values.SelectMany(path => path.Operations!))
+            {
+                operation.Value.Security ??= [];
+                operation.Value.Security.Add(new OpenApiSecurityRequirement
+                {
+                    [new OpenApiSecuritySchemeReference("Bearer", document)] = []
+                });
+            }
+        }
+
+        if (authenticationSchemes.Any(authScheme => authScheme.Name == "ApiKey"))
+        {
+            // Add the security scheme at the document level
+            securitySchemes.Add("ApiKey", new OpenApiSecurityScheme
+            {
+                Name = "X-API-KEY",
+                Type = SecuritySchemeType.ApiKey,
+                In = ParameterLocation.Header,
+                Description = "API key authorization header",
+            });
+
+            // Apply it as a requirement for all operations
+            foreach (KeyValuePair<HttpMethod, OpenApiOperation> operation in document.Paths.Values.SelectMany(path => path.Operations!))
+            {
+                operation.Value.Security ??= [];
+                operation.Value.Security.Add(new OpenApiSecurityRequirement
+                {
+                    [new OpenApiSecuritySchemeReference("ApiKey", document)] = []
+                });
+            }
+        }
+
+        // Set available security schemes in the document
+        document.Components.SecuritySchemes = securitySchemes;
+    }
+}
