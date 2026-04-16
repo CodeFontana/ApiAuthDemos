@@ -1,0 +1,103 @@
+@baseUrl = https://localhost:7280
+
+@clientId = demo-client
+@clientSecret = demo-secret-value-12345
+@scope = weather.read weather.write
+@audience = OAuthServerDemo
+
+@readonlyClientId = readonly-client
+@readonlyClientSecret = readonly-secret-value-67890
+@readonlyScope = weather.read
+
+###
+
+# @name tokenFullAccess
+# Request an access token using the Client Credentials grant (full scope)
+POST {{baseUrl}}/api/v1/OAuth/token
+Content-Type: application/x-www-form-urlencoded
+
+grant_type=client_credentials&client_id={{clientId}}&client_secret={{clientSecret}}&scope={{scope}}&audience={{audience}}
+
+###
+
+# @name tokenReadOnly
+# Request an access token for the read-only client
+POST {{baseUrl}}/api/v1/OAuth/token
+Content-Type: application/x-www-form-urlencoded
+
+grant_type=client_credentials&client_id={{readonlyClientId}}&client_secret={{readonlyClientSecret}}&scope={{readonlyScope}}
+
+###
+
+# @name getWeatherForecasts
+# GET weather forecasts using the full-access token (requires weather.read scope)
+GET {{baseUrl}}/api/v1/WeatherForecast
+Authorization: Bearer {{tokenFullAccess.response.body.$.access_token}}
+
+###
+
+# @name createWeatherForecast
+# POST a new weather forecast using the full-access token (requires weather.write scope)
+POST {{baseUrl}}/api/v1/WeatherForecast
+Content-Type: application/json
+Authorization: Bearer {{tokenFullAccess.response.body.$.access_token}}
+
+{
+    "date": "2026-04-20",
+    "temperatureC": 25,
+    "summary": "Warm and sunny"
+}
+
+###
+
+# @name getWeatherReadOnly
+# GET weather forecasts using the read-only token
+GET {{baseUrl}}/api/v1/WeatherForecast
+Authorization: Bearer {{tokenReadOnly.response.body.$.access_token}}
+
+###
+
+# @name createWeatherReadOnly
+# POST should fail with 403 for the read-only client (missing weather.write scope)
+POST {{baseUrl}}/api/v1/WeatherForecast
+Content-Type: application/json
+Authorization: Bearer {{tokenReadOnly.response.body.$.access_token}}
+
+{
+    "date": "2026-04-20",
+    "temperatureC": 25,
+    "summary": "Warm and sunny"
+}
+
+###
+
+# @name tokenInvalidClient
+# Should return 401 - invalid client credentials
+POST {{baseUrl}}/api/v1/OAuth/token
+Content-Type: application/x-www-form-urlencoded
+
+grant_type=client_credentials&client_id=bad-client&client_secret=bad-secret&scope=weather.read
+
+###
+
+# @name tokenInvalidScope
+# Should return 400 - requesting a scope the client is not allowed
+POST {{baseUrl}}/api/v1/OAuth/token
+Content-Type: application/x-www-form-urlencoded
+
+grant_type=client_credentials&client_id={{readonlyClientId}}&client_secret={{readonlyClientSecret}}&scope=weather.write
+
+###
+
+# @name tokenInvalidGrantType
+# Should return 400 - unsupported grant type
+POST {{baseUrl}}/api/v1/OAuth/token
+Content-Type: application/x-www-form-urlencoded
+
+grant_type=authorization_code&client_id={{clientId}}&client_secret={{clientSecret}}&scope={{scope}}
+
+###
+
+# @name healthCheck
+# Health check endpoint (anonymous access)
+GET {{baseUrl}}/api/health
