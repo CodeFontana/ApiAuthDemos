@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.RateLimiting;
 namespace CertAuthDemo.Controllers.v1;
 
 [ApiController]
-[Route("api/v{version:apiVersion}/[controller]")]
+[Route("api/v1/[controller]")]
 [EnableRateLimiting("fixed")]
 public class WeatherForecastController : ControllerBase
 {
